@@ -167,6 +167,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def helper(self, game_state, depth):
         # Rand col from optional moves.
+        optional_move_nodes = None
         rnd_col = None
         if len(game_state.getLegalActions(gameUtil.AI)) > 0:
             optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
@@ -182,8 +183,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             val = -math.inf
 
             # Get valid actions
-            optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
-            column = random.choice(optional_move_nodes)
+            #optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
+            #rnd_col = random.choice(optional_move_nodes)
 
             # Check each possible col
             for col in optional_move_nodes:
@@ -195,8 +196,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 # If maximizing, select.
                 if new_score > val:
                     val = new_score
-                    column = col
-            return column, val
+                    rnd_col = col
+            return rnd_col, val
 
         # PLAYER's turn
         else:
