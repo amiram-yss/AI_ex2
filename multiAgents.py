@@ -185,6 +185,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
             column = random.choice(optional_move_nodes)
 
+            # Check each possible col
             for col in optional_move_nodes:
                 # Create successor node for available node.
                 successor = game_state.generateSuccessor(gameUtil.AI, col)
