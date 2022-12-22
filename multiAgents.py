@@ -13,6 +13,7 @@ Student ID:     314985474
 # http://ai.berkeley.edu.
 # We thank them for that! :)
 
+# region useless stuff
 
 import random, util, math
 
@@ -61,59 +62,97 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 1)
     """
     # TODO check how inheritance works in Python
-    def helper(self, gameState:connect4.GameState, depth):
-        # Get rid of self.(...)
-        depth = self.depth
-        # Get optional moves.
-        optional_moves = gameState.getLegalActions()
+    def helper(self, game_state: connect4.GameState, depth):
         # Is last move
-        is_last_move = gameState.is_terminal()
+        is_terminal = game_state.is_terminal()
         # As long as game runs:
-        if not is_last_move and depth != 0:
-            # If the game can end next turn
-            if is_last_move:
-                # Make the winning move, if possible.
-                if gameState.winning(gameState.get_piece_player()):
-                    return math.inf
-                # Avoiding loosing next turn.
-                if gameState.winning(gameState.get_opp_piece()):
-                    return -math.inf
-                # It's a tie.
-                return 0
-            else:
-                return gameState.getScore()
-        # If it's AI's turn -> maximization.
-        if gameState.turn == gameUtil.AI:
+        # winning = winning_move
+        if is_terminal or depth == 0:
+            return None, self.evaluationFunction(game_state)
+        optional_move_nodes = game_state.getLegalActions()
+        best_col = 0
+        # AI
+        if game_state.turn == gameUtil.AI:
             val = -math.inf
-            column = random.choice(optional_moves)
-            for col in optional_moves:
-                row = gameState.get_next_open_row(col)
-                next_move_state = gameState
-                next_move_state.turn = gameUtil.PLAYER
-                next_move_state.drop_piece(row, col, gameUtil.AI_PIECE)
-                next_score = self.helper(next_move_state, depth - 1)
-                if next_score > val:
-                    val, column = next_score, col
-            return column, val
-        # If PLAYER's turn -> minimization.
+            # Check each possible col
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(game_state.turn, col)
+                successor.switch_turn(game_state.turn)
+                # Get score for node
+                new_score = self.helper(successor, depth - 1)[1]
+                # If maximizing, select.
+                if new_score > val:
+                    val = new_score
+                    best_col = col
+            return best_col, val
+        # PLAYER
         else:
             val = math.inf
-            column = random.choice(optional_moves)
-            for col in optional_moves:
-                row = gameState.get_next_open_row(col)
-                next_move_state = gameState
-                next_move_state.turn = gameUtil.AI
-                next_move_state.drop_piece(row, col, gameUtil.PLAYER_PIECE)
-                next_score = self.helper(next_move_state, depth - 1)
-                if next_score > val:
-                    val, column = next_score, col
-            return column, val
+            # Check each possible col
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(game_state.turn, col)
+                successor.switch_turn(game_state.turn)
+                # Get score for node
+                new_score = self.helper(successor, depth - 1)[1]
+                # If maximizing, select.
+                if new_score < val:
+                    val = new_score
+                    best_col = col
+            return best_col, val
 
     def getAction(self, gameState):
-        return self.helper(gameState, self.depth)
+        res = self.helper(gameState, self.depth)[0]
+        return res
 
+# endregion
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
+    def helper(self, game_state: connect4.GameState, depth):
+        # Is last move
+        is_terminal = game_state.is_terminal()
+        # As long as game runs:
+        # winning = winning_move
+        if is_terminal or depth == 0:
+            return None, self.evaluationFunction(game_state)
+        optional_move_nodes = game_state.getLegalActions()
+        best_col = 0
+        # AI
+        if game_state.turn == gameUtil.AI:
+            val = -math.inf
+            # Check each possible col
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(game_state.turn, col)
+                successor.switch_turn(game_state.turn)
+                # Get score for node
+                new_score = self.helper(successor, depth - 1)[1]
+                # If maximizing, select.
+                if new_score > val:
+                    val = new_score
+                    best_col = col
+            return best_col, val
+        # PLAYER
+        else:
+            val = math.inf
+            # Check each possible col
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(game_state.turn, col)
+                successor.switch_turn(game_state.turn)
+                # Get score for node
+                new_score = self.helper(successor, depth - 1)[1]
+                # If maximizing, select.
+                if new_score < val:
+                    val = new_score
+                    best_col = col
+            return best_col, val
+
+    def getAction(self, gameState):
+        res = self.helper(gameState, self.depth)[0]
+        return res
+
     def getAction(self, gameState):
         """
             Your minimax agent with alpha-beta pruning (question 2)

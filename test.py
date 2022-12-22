@@ -59,4 +59,4 @@ if __name__ == '__main__':
             if result == studentResult:
                 print("Test file:   ***"+f.split('\\')[1] + "***   Good! :)")
             else:
-                print("Test file:   ***"+f.split('\\')[1] + "***   Something went wromg... ")
+                print("Test file:   ***"+f.split('\\')[1] + "***   Something went wrong... ")

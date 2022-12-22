@@ -364,10 +364,6 @@ def runGames(graphicMode, gameMode, agent):
             g.wait_to_end()
 
 
-
-
-
-
 if __name__ == '__main__':
     # graphicMode - True- for graphic mode. False- for textual mode
     # gameMode  - get the value 2- for player vs. player or 1- for palyer vs. AI_agent
@@ -375,13 +371,13 @@ if __name__ == '__main__':
     # type - the name of the agent will play as AI_agent (one of "BestRandom", "MinimaxAgent", "AlphaBetaAgent", "ExpectimaxAgent")
 
     graphicMode = True
-    gameMode = 2
-    depth = 0
+    gameMode = 1
+    depth = 3
     # must be at least 3 with different agent then Random
-    type = ""
+    type = "MinimaxAgent"
 
     agent = None
-    if gameMode  == 1:
+    if gameMode== 1:
         agentType = util.loadAgent(type)
         agent = agentType(**{"depth": depth})  # Instantiate agent with agentArgs
 
