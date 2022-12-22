@@ -13,7 +13,7 @@ Student ID:     314985474
 # http://ai.berkeley.edu.
 # We thank them for that! :)
 
-# region useless stuff
+# region Completed stuff
 
 import random, util, math
 
@@ -106,10 +106,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         res = self.helper(gameState, self.depth)[0]
         return res
 
-# endregion
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
-    def helper(self, game_state: connect4.GameState, depth):
+    def helper(self, game_state: connect4.GameState, depth, alpha, beta):
         # Is last move
         is_terminal = game_state.is_terminal()
         # As long as game runs:
@@ -127,11 +126,16 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 successor = game_state.generateSuccessor(game_state.turn, col)
                 successor.switch_turn(game_state.turn)
                 # Get score for node
-                new_score = self.helper(successor, depth - 1)[1]
+                new_score = self.helper(successor, depth - 1, alpha, beta)[1]
                 # If maximizing, select.
                 if new_score > val:
                     val = new_score
                     best_col = col
+                # BETA cutoff
+                if val >= beta:
+                    break
+                alpha = max(alpha, val)
+
             return best_col, val
         # PLAYER
         else:
@@ -142,33 +146,72 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 successor = game_state.generateSuccessor(game_state.turn, col)
                 successor.switch_turn(game_state.turn)
                 # Get score for node
-                new_score = self.helper(successor, depth - 1)[1]
+                new_score = self.helper(successor, depth - 1, alpha, beta)[1]
                 # If maximizing, select.
                 if new_score < val:
                     val = new_score
                     best_col = col
+                # ALPHA cutoff
+                if val <= alpha:
+                    break
+                beta = min(beta, val)
             return best_col, val
 
     def getAction(self, gameState):
-        res = self.helper(gameState, self.depth)[0]
+        res = self.helper(gameState, self.depth, -math.inf, math.inf)[0]
         return res
-
-    def getAction(self, gameState):
-        """
-            Your minimax agent with alpha-beta pruning (question 2)
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+# endregion
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
-    """
-      Your expectimax agent (question 3)
-    """
+
+    def helper(self, game_state, depth):
+        # Rand col from optional moves.
+        rnd_col = None
+        if len(game_state.getLegalActions(gameUtil.AI)) > 0:
+            optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
+            rnd_col = random.choice(optional_move_nodes)
+
+        # If terminal, return it's evaluation
+        if game_state.is_terminal() or depth == 0:
+            return rnd_col, self.evaluationFunction(game_state)
+
+        # AI's turn
+        if game_state.turn == gameUtil.AI:
+            # Min value for maximization
+            val = -math.inf
+
+            # Get valid actions
+            optional_move_nodes = game_state.getLegalActions(gameUtil.AI)
+            column = random.choice(optional_move_nodes)
+
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(gameUtil.AI, col)
+                successor.switch_turn(successor.turn)
+                # Get score for node
+                new_score = self.helper(successor, depth - 1)[1]
+                # If maximizing, select.
+                if new_score > val:
+                    val = new_score
+                    column = col
+            return column, val
+
+        # PLAYER's turn
+        else:
+            val = 0
+            # Check each possible col
+            for col in optional_move_nodes:
+                # Create successor node for available node.
+                successor = game_state.generateSuccessor(gameUtil.AI, col)
+                successor.switch_turn(successor.turn)
+                # Get score for node
+                score = self.helper(successor, depth - 1)[1]
+                # Calc probability to pick the successor,
+                p = len(optional_move_nodes)
+                # and sum it up.
+                val += (1 / p) * score
+            return rnd_col, val
 
     def getAction(self, gameState):
-        """
-        Returns the expectimax action using self.depth and self.evaluationFunction
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.helper(gameState, self.depth)[0]
